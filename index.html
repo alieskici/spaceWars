@@ -1,0 +1,225 @@
+<!--
+    SPACE WARS [Prototype] (20190215)
+    > No permission for commercial use.
+    > if you want to use OR collaboration OR request me
+        to continue to develop for any goal,
+        pls contact me at here or alies76@gmail.com
+    github.com/alieskici
+-->
+
+<!--
+    Features (+: added, -:won't be added to this version):
+        - Multiply fire
+        + Multiply enemies
+        - Multi type enemies
+        + Ordered enemies
+        + Background scene
+        - Change background scene
+        - Sounds & Sound effects
+        - Animations & Visual effects
+        - Energy & Time options
+        - Hardness options
+        - Levels
+        - Mouse control; to move & fire
+        - Ship options; according to different specifications.
+        - Point & Bonus
+
+    Note: For JS, to apply all dynmaic features above will effect on
+        performance badly. So may need to choose an OS based platform.
+-->
+
+
+<html>
+
+<head>
+    <title>Space Wars / github.com/alieskici</title>
+    <meta charset="UTF-8">
+    <script>
+        var ship;
+        var sx, sy; //ship coordinates
+        var sw, sh; //ship width, height
+
+        var ca;  //canvas
+        var cx;  //context of ca
+        var timer;
+        var started;    //game has been started; to cancel continuosly click on the stage
+
+        //enemy
+        var ei;    //enemy ship image; Image
+        var ew, eh;     //enemy width height; int
+        var ea = [];    //enemy active; boolean
+        var ex = [];    //enemy coordinate x
+        var ey = [];    //enemy coordinate y
+        var eCount;     //enemy number of horizontal & vertical
+
+        var fired;
+        var fireX;
+        var fireY;
+        var timerFire;
+        var countShooted;
+
+        function Start() {
+            ca = document.getElementById("space");
+            cx = ca.getContext("2d");
+            cx.fillStyle = "#FFFFFF";
+
+            //init our ship
+            ship = new Image();
+            ship.src = "resource/ship.png";
+            sw = 50; sh = 75;
+            sx = (ca.width - sw) / 2;
+            sy = ca.height - sh;
+
+            //init enemies
+            ei = new Image();
+            ei.src = "resource/shipEnemy.png";
+            ew = 40; eh = 37;
+            eCount = 10;    //offering for performance this must be <= 20
+
+            let v = -1; //vertical count
+            let h = -1; //horizontal count
+            let m = (ca.width - (ew + 15) * 5 + 15) / 2; //to make middle horizontally
+
+            for (let i = 0; i < eCount; i++) {
+                v++;
+                if (v > 4) { v = 0; h++; }
+                ex[i] = m + v * (ew + 15);
+                ey[i] = h * (eh + 10);
+                ea[i] = true;
+            }
+
+            countShooted = 0;   //when == ecount then finish game
+
+            if (!started) {
+                document.addEventListener("keydown", Keypress);
+                started = true;
+                timer = setInterval(Draw, 200);
+            }
+        }
+
+        function Keypress(e) {
+            if (e.keyCode == 37) {
+                sx -= 2;
+                if (sx < 1) {
+                    sx = 0;
+                }
+            }
+            if (e.keyCode == 39) {
+                sx += 2;
+                if (sx > ca.clientWidth - sw) {
+                    sx = ca.clientWidth - sw;
+                }
+            }
+
+            //fire
+            if (e.keyCode == 17) {
+                if (!fired) {
+                    fired = true;
+                    fireX = sx + sw / 2 - 2;
+                    fireY = sy;
+                    timerFire = setInterval(Fire, 40);
+                }
+            }
+        }
+
+        function Fire() {
+            cx.clearRect(fireX, fireY, 4, 8);
+            fireY -= 8;
+
+            for (let i = 0; i < eCount; i++) {
+                if (ea[i]) {
+                    if (fireY < ey[i] + eh) {
+                        if (fireX > ex[i]) {
+                            if (fireX < ex[i] + ew) {
+                                ea[i] = false;
+                                fired = false;
+                                countShooted++;
+                                if (countShooted == eCount) {
+                                    document.getElementById("info").innerHTML = "Congrats!";
+                                    draw();
+                                    clearInterval(timer);
+                                }
+                                clearInterval(timerFire);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (fireY < 0) {
+                fired = false;
+                clearInterval(timerFire);
+            }
+
+            cx.fillRect(fireX, fireY, 4, 8);
+        }
+
+        function Draw() {
+            cx.clearRect(0, 0, ca.width, ca.height);
+
+            for (let i = 0; i < eCount; i++) {
+                if (ea[i]) {
+                    ey[i] += 1;
+                    if (ey[i] > sy) {
+                        started = false;
+                        clearInterval(timerFire);
+                        clearInterval(timer);
+                    }
+                    cx.drawImage(ei, ex[i], ey[i]);
+                }
+            }
+
+            cx.drawImage(ship, sx, sy);
+        }
+    </script>
+</head>
+
+<body style="background-color:black; color: white">
+    <center>
+        <div id="info">Click on area to start.</div>
+        <canvas id="space" width="300" height="400"
+            style="background-color: #dddddd; background-image: url(resource/bg.png);" onclick="Start()"></canvas>
+        <p>Move: Left-Right arrow buttons. - Fire: CTRL</p>
+        <hr style="border: 0px; border-bottom: 4px dotted; width:400">
+        <p><a href="https://github.com/alieskici" target="_blank" style="color:white; text-decoration:none">github.com/alieskici</a></p>
+        <table border="0" width="500" cellpadding="8">
+            <tr>
+                <td>
+                    <p>
+                        SPACE WARS [Prototype] (20190215)
+                        <br>(<span style="color:#FFAAAA; font-weight: bold">No permission for commercial use.</span>)
+                        <br><br>if you want to use OR collaboration OR request me
+                        <br>to continue to develop OR any else goal,
+                        <br>please contact me at github.com/alieskici or alies76@gmail.com
+                    </p>
+                </td>
+            </tr>
+            <tr style="background-color: #222222">
+                <td>
+                    <p>
+                        Features (+: added, -:won't be added to this version):
+                        <br> - Multiply fire
+                        <br>+ Multiply enemies
+                        <br>- Multi type enemies
+                        <br>+ Ordered enemies
+                        <br>+ Background scene
+                        <br>- Change background scene
+                        <br>- Sounds & Sound effects
+                        <br>- Animations & Visual effects
+                        <br>- Energy & Time options
+                        <br>- Hardness options
+                        <br>- Levels
+                        <br>- Mouse control; to move & fire
+                        <br>- Ship options; according to different specifications.
+                        <br>- Point & Bonus
+
+                        <br><br>Note: For JS, to apply all dynmaic features above will effect on
+                        performance badly. So may need to choose an another platform.
+                    </p>
+                </td>
+            </tr>
+        </table>
+    </center>
+</body>
+
+</html>
